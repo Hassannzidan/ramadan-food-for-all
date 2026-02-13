@@ -1,5 +1,4 @@
 import heroImg from "@/assets/hero-donate-food.jpg";
-import foodPlate from "@/assets/food-plate.png";
 
 const HeroSection = () => {
   return (
@@ -25,16 +24,6 @@ const HeroSection = () => {
             نجمع فائض الطعام ونُعيد تجهيزه في وجبات متكاملة
             لنقدمها للأسر الأكثر احتياجًا بكرامة واحترام.
           </p>
-
-          {/* Food plate visual */}
-          <div className="flex justify-center mb-8">
-            <img
-              src={foodPlate}
-              alt="أطباق الوجبات"
-              className="w-40 md:w-52 opacity-85 drop-shadow-2xl"
-            />
-          </div>
-
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="#contact"
