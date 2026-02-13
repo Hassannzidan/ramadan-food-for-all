@@ -12,10 +12,10 @@ const Index = () => {
     <div className="font-cairo">
       <Navbar />
       <HeroSection />
+      <MediaShowcase />
       <AboutSection />
       <StatsSection />
       <HowItWorks />
-      <MediaShowcase />
       <ContactSection />
       <Footer />
     </div>
