@@ -19,7 +19,7 @@ const Navbar = () => {
       <div className="container mx-auto flex items-center justify-between py-4 px-4">
         <a href="#hero" className="flex items-center gap-2">
           <img src={logo} alt="شعار مائدة الخير" className="h-10 w-10 rounded-full object-cover" />
-          <span className="text-xl font-bold text-gradient-gold">مائدة الخير</span>
+          <span className="text-xl font-bold" style={{ color: 'hsl(195, 55%, 18%)' }}>طبق الخير</span>
         </a>
 
         {/* Desktop */}
