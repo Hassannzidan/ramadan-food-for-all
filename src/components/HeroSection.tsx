@@ -1,11 +1,12 @@
 import heroImg from "@/assets/hero-donate-food.jpg";
+import foodPlate from "@/assets/food-plate.png";
 
 const HeroSection = () => {
   return (
     <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background image */}
       <div className="absolute inset-0">
-        <img src={heroImg} alt="مائدة رمضان" className="w-full h-full object-cover" />
+        <img src={heroImg} alt="طبق الخير" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/70 to-primary/40" />
       </div>
 
@@ -24,6 +25,16 @@ const HeroSection = () => {
             نجمع فائض الطعام ونُعيد تجهيزه في وجبات متكاملة
             لنقدمها للأسر الأكثر احتياجًا بكرامة واحترام.
           </p>
+
+          {/* Food plate visual */}
+          <div className="flex justify-center mb-8">
+            <img
+              src={foodPlate}
+              alt="أطباق الوجبات"
+              className="w-40 md:w-52 opacity-85 drop-shadow-2xl"
+            />
+          </div>
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="#contact"

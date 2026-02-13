@@ -1,6 +1,12 @@
 import { useState } from "react";
 import logo from "@/assets/logo.jpg";
 import { Menu, X } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 const navLinks = [
   { label: "الرئيسية", href: "#hero" },
@@ -44,27 +50,33 @@ const Navbar = () => {
         </a>
 
         {/* Mobile toggle */}
-        <button onClick={() => setOpen(!open)} className="md:hidden text-foreground">
-          {open ? <X size={28} /> : <Menu size={28} />}
+        <button onClick={() => setOpen(true)} className="md:hidden text-foreground">
+          <Menu size={28} />
         </button>
       </div>
 
-      {/* Mobile menu */}
-      {open && (
-        <div className="md:hidden bg-background border-t border-border px-4 pb-4">
-          <ul className="flex flex-col gap-4 pt-4">
+      {/* Mobile drawer from left */}
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent side="left" className="w-72 p-0">
+          <SheetHeader className="p-6 border-b border-border">
+            <SheetTitle className="flex items-center gap-2">
+              <img src={logo} alt="شعار" className="h-8 w-8 rounded-full object-cover" />
+              <span className="font-bold" style={{ color: 'hsl(195, 55%, 18%)' }}>طبق الخير</span>
+            </SheetTitle>
+          </SheetHeader>
+          <ul className="flex flex-col gap-2 p-6">
             {navLinks.map((link) => (
               <li key={link.href}>
                 <a
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className="text-foreground/80 hover:text-accent transition-colors font-medium block"
+                  className="text-foreground/80 hover:text-accent transition-colors font-medium block py-2 text-right"
                 >
                   {link.label}
                 </a>
               </li>
             ))}
-            <li>
+            <li className="mt-4">
               <a
                 href="#contact"
                 onClick={() => setOpen(false)}
@@ -74,8 +86,8 @@ const Navbar = () => {
               </a>
             </li>
           </ul>
-        </div>
-      )}
+        </SheetContent>
+      </Sheet>
     </nav>
   );
 };
