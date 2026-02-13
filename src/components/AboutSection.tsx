@@ -4,17 +4,17 @@ const features = [
   {
     icon: Heart,
     title: "رسالتنا",
-    description: "نؤمن بأن لكل محتاج حق في وجبة كريمة خلال شهر رمضان المبارك.",
+    description: "أن يصل الخير كاملًا كما ينبغي، وأن يتحول كل فائض إلى أمل يملأ البيوت دفئًا.",
   },
   {
     icon: Users,
     title: "مجتمعنا",
-    description: "نعمل مع أكثر من ٥٠٠ متطوع لتوصيل الطعام إلى الأسر في جميع المناطق.",
+    description: "نعمل مع متطوعين لجمع فائض الطعام وفرزه بعناية لضمان جودته وسلامته.",
   },
   {
     icon: Utensils,
     title: "رؤيتنا",
-    description: "مائدة رمضان تجمع الجميع — لا نريد أن يبقى أحد جائعاً في الشهر الكريم.",
+    description: "نُعيد تجهيز الفائض في وجبات متكاملة تحتوي على مختلف الأصناف الغذائية للأسر المحتاجة.",
   },
 ];
 
@@ -25,10 +25,10 @@ const AboutSection = () => {
         <div className="text-center mb-16">
           <span className="text-accent font-bold text-sm tracking-wider">من نحن</span>
           <h2 className="text-3xl md:text-5xl font-black text-foreground mt-3 mb-4">
-            نشر الخير في <span className="text-gradient-gold">رمضان</span>
+            حفظ النعمة · <span className="text-gradient-gold">نشر الخير</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            حملة مائدة رمضان هي مبادرة خيرية لتوفير وجبات الإفطار والسحور للأسر المحتاجة
+            مبادرة إنسانية تهدف إلى جمع فائض الطعام وإعادة تجهيزه في وجبات متكاملة للأسر الأكثر احتياجًا بكرامة واحترام
           </p>
         </div>
 

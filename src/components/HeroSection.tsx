@@ -13,16 +13,16 @@ const HeroSection = () => {
       <div className="relative z-10 container mx-auto px-4 text-center pt-20">
         <div className="animate-fade-up">
           <p className="text-gold-light text-lg md:text-xl mb-4 font-medium">
-            ✦ رمضان كريم ✦
+            ✦ حفظ النعمة · نشر الخير ✦
           </p>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-primary-foreground mb-6 leading-tight">
-            مائدة رمضان
+            مائدة الخير
             <br />
-            <span className="text-gradient-gold">لإطعام المحتاجين</span>
+            <span className="text-gradient-gold">من فائض إلى أمل</span>
           </h1>
           <p className="text-primary-foreground/80 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-            نسعى لإيصال وجبات الإفطار والسحور إلى الأسر المحتاجة خلال الشهر الفضيل.
-            ساهم معنا في نشر البركة والخير.
+            نجمع فائض الطعام ونُعيد تجهيزه في وجبات متكاملة
+            لنقدمها للأسر الأكثر احتياجًا بكرامة واحترام.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
