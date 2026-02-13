@@ -1,4 +1,5 @@
 import { useState } from "react";
+import logo from "@/assets/logo.jpg";
 import { Menu, X } from "lucide-react";
 
 const navLinks = [
@@ -16,8 +17,9 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 right-0 left-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="container mx-auto flex items-center justify-between py-4 px-4">
-        <a href="#hero" className="text-2xl font-bold text-primary">
-          🌙 <span className="text-gradient-gold">مائدة رمضان</span>
+        <a href="#hero" className="flex items-center gap-2">
+          <img src={logo} alt="شعار مائدة الخير" className="h-10 w-10 rounded-full object-cover" />
+          <span className="text-xl font-bold text-gradient-gold">مائدة الخير</span>
         </a>
 
         {/* Desktop */}
