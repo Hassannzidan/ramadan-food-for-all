@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -12,30 +12,36 @@ const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signIn, isAdmin, user } = useAuth();
+  const { signIn, isAdmin, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Redirect if already logged in as admin
-  if (user && isAdmin) {
-    navigate("/admin/dashboard", { replace: true });
-    return null;
-  }
+  // Redirect when admin status is confirmed
+  useEffect(() => {
+    if (!authLoading && user && isAdmin) {
+      navigate("/admin/dashboard", { replace: true });
+    }
+  }, [user, isAdmin, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     const { error } = await signIn(email, password);
-    setLoading(false);
 
     if (error) {
+      setLoading(false);
       toast({ title: "Login Failed", description: error, variant: "destructive" });
-      return;
     }
-
-    // Small delay for role check
-    setTimeout(() => navigate("/admin/dashboard", { replace: true }), 500);
+    // Don't setLoading(false) on success - the useEffect will handle redirect
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background" dir="ltr">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-emerald islamic-pattern p-4" dir="ltr">

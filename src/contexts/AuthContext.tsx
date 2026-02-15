@@ -19,40 +19,49 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const checkAdmin = async (userId: string) => {
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .eq("role", "admin")
-      .maybeSingle();
-    return !!data;
+  const checkAdmin = async (userId: string): Promise<boolean> => {
+    try {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle();
+      return !!data;
+    } catch {
+      return false;
+    }
   };
 
   useEffect(() => {
+    let mounted = true;
+
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
+
       if (session?.user) {
-        const admin = await checkAdmin(session.user.id);
-        setIsAdmin(admin);
+        // Use setTimeout to avoid potential Supabase deadlock
+        setTimeout(async () => {
+          if (!mounted) return;
+          const admin = await checkAdmin(session.user.id);
+          if (mounted) {
+            setIsAdmin(admin);
+            setLoading(false);
+          }
+        }, 0);
       } else {
         setIsAdmin(false);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        const admin = await checkAdmin(session.user.id);
-        setIsAdmin(admin);
-      }
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {

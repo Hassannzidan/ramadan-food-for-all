@@ -3,10 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "react-leaflet";
 import { Search, Save } from "lucide-react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -19,48 +17,12 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
-interface ClickedLocation {
-  lat: number;
-  lng: number;
-}
-
-const SearchControl = ({ onSearch }: { onSearch: (query: string) => void }) => {
-  const [query, setQuery] = useState("");
-  return (
-    <div className="flex gap-2">
-      <Input
-        placeholder="Search location..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && onSearch(query)}
-      />
-      <Button onClick={() => onSearch(query)} size="icon">
-        <Search className="w-4 h-4" />
-      </Button>
-    </div>
-  );
-};
-
-const MapClickHandler = ({ onClick }: { onClick: (loc: ClickedLocation) => void }) => {
-  useMapEvents({
-    click(e) {
-      onClick({ lat: e.latlng.lat, lng: e.latlng.lng });
-    },
-  });
-  return null;
-};
-
-const FlyTo = ({ position }: { position: [number, number] | null }) => {
-  const map = useMap();
-  useEffect(() => {
-    if (position) map.flyTo(position, 17);
-  }, [position, map]);
-  return null;
-};
-
 const MapPage = () => {
-  const [clicked, setClicked] = useState<ClickedLocation | null>(null);
-  const [flyTo, setFlyTo] = useState<[number, number] | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const markerRef = useRef<L.Marker | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [clicked, setClicked] = useState<{ lat: number; lng: number } | null>(null);
   const [buildingNumber, setBuildingNumber] = useState("");
   const [streetName, setStreetName] = useState("");
   const [locationDetails, setLocationDetails] = useState("");
@@ -68,42 +30,66 @@ const MapPage = () => {
   const [reverseLoading, setReverseLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleSearch = async (query: string) => {
-    if (!query.trim()) return;
+  useEffect(() => {
+    if (!mapContainerRef.current || mapRef.current) return;
+
+    const map = L.map(mapContainerRef.current).setView([31.5, 34.47], 13);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/">OSM</a>',
+    }).addTo(map);
+
+    map.on("click", async (e: L.LeafletMouseEvent) => {
+      const { lat, lng } = e.latlng;
+      setClicked({ lat, lng });
+
+      if (markerRef.current) {
+        markerRef.current.setLatLng([lat, lng]);
+      } else {
+        markerRef.current = L.marker([lat, lng]).addTo(map);
+      }
+
+      setReverseLoading(true);
+      setDialogOpen(true);
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`
+        );
+        const data = await res.json();
+        setBuildingNumber(data.address?.house_number || "");
+        setStreetName(data.address?.road || "");
+        setLocationDetails(data.display_name || "");
+      } catch {
+        setBuildingNumber("");
+        setStreetName("");
+        setLocationDetails("");
+      }
+      setReverseLoading(false);
+    });
+
+    mapRef.current = map;
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
+  }, []);
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`
       );
       const data = await res.json();
       if (data.length > 0) {
         const { lat, lon } = data[0];
-        setFlyTo([parseFloat(lat), parseFloat(lon)]);
+        mapRef.current?.flyTo([parseFloat(lat), parseFloat(lon)], 17);
       } else {
         toast({ title: "No results found", variant: "destructive" });
       }
     } catch {
       toast({ title: "Search failed", variant: "destructive" });
     }
-  };
-
-  const handleMapClick = async (loc: ClickedLocation) => {
-    setClicked(loc);
-    setReverseLoading(true);
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${loc.lat}&lon=${loc.lng}&format=json&addressdetails=1`
-      );
-      const data = await res.json();
-      setBuildingNumber(data.address?.house_number || "");
-      setStreetName(data.address?.road || "");
-      setLocationDetails(data.display_name || "");
-    } catch {
-      setBuildingNumber("");
-      setStreetName("");
-      setLocationDetails("");
-    }
-    setReverseLoading(false);
-    setDialogOpen(true);
   };
 
   const handleSaveBuilding = async () => {
@@ -121,33 +107,31 @@ const MapPage = () => {
       toast({ title: "Building saved!" });
       setDialogOpen(false);
       setClicked(null);
+      if (markerRef.current) {
+        markerRef.current.remove();
+        markerRef.current = null;
+      }
     }
   };
 
   return (
     <div className="space-y-4">
       <h1 className="text-3xl font-bold">Map & Areas</h1>
-      <p className="text-muted-foreground">Search for locations and click on buildings to save them.</p>
-      <SearchControl onSearch={handleSearch} />
+      <p className="text-muted-foreground">Search for locations and click on the map to save buildings.</p>
 
-      <div className="rounded-lg overflow-hidden border" style={{ height: "65vh" }}>
-        <MapContainer center={[31.5, 34.47]} zoom={13} style={{ height: "100%", width: "100%" }}>
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/">OSM</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <MapClickHandler onClick={handleMapClick} />
-          <FlyTo position={flyTo} />
-          {clicked && (
-            <Marker position={[clicked.lat, clicked.lng]}>
-              <Popup>
-                {streetName && <p><strong>{streetName}</strong></p>}
-                {buildingNumber && <p>Building: {buildingNumber}</p>}
-              </Popup>
-            </Marker>
-          )}
-        </MapContainer>
+      <div className="flex gap-2">
+        <Input
+          placeholder="Search location..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+        />
+        <Button onClick={handleSearch} size="icon">
+          <Search className="w-4 h-4" />
+        </Button>
       </div>
+
+      <div ref={mapContainerRef} className="rounded-lg overflow-hidden border" style={{ height: "65vh" }} />
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
